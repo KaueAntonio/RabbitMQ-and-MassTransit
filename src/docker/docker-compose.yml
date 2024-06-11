@@ -1,0 +1,49 @@
+version: '3.7'
+
+networks:
+  shop-networking:
+
+services:
+  shop-api:
+    container_name: Api
+    build: 
+      context: ../
+      dockerfile: ./docker/WebApi/Dockerfile
+    environment:
+      ConnectionStrings__Database: "User ID=shop;Password=shop;Host=shop-db;Port=5432;Database=shop;"
+      MessageBroker__Host: "amqp://shop-mq:5672"
+      MessageBroker__Username: "shop"
+      MessageBroker__Password: "shop"
+    ports:
+      - 8080:8080
+    networks:
+      - shop-networking
+
+  shop-db:
+    image: postgres:latest
+    container_name: Database
+    environment:
+      POSTGRES_DB: shop
+      POSTGRES_USER: shop
+      POSTGRES_PASSWORD: shop
+    volumes:
+      - ./.containers/database:/var/lib/postgresql/database
+    ports:
+      - 5432:5432
+    networks:
+      - shop-networking
+  
+  shop-mq:
+    image: rabbitmq:3.11.7-management
+    container_name: Queue
+    volumes:
+      - ./.containers/database:/var/lib/rabbitmq
+      - ./.containers/database:/var/log/rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "shop"
+      RABBITMQ_DEFAULT_PASS: "shop"
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - shop-networking
