@@ -14,10 +14,7 @@ builder.Services.AddInfraModules(builder.Configuration);
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.ApplyMigrations();
-}
+app.ApplyMigrations();
 
 ProductController.MapRoutes(app);
 
